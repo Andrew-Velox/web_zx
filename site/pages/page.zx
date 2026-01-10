@@ -1,0 +1,134 @@
+pub const CounterComponent = @import("./client.zig").CounterComponent;
+pub fn Page(ctx: zx.PageContext) zx.Component {
+    return (
+        <main @allocator={ctx.arena}>
+            <SimpleApp @rendering={.client} @allocator={ctx.arena} />
+            
+        </main>
+    );
+}
+var count: zx.Signal(i32) = .init(0);
+
+const Item = struct { id: u32, text: []const u8 };
+
+pub fn SimpleApp(allocator: zx.Allocator) zx.Component {
+    if (builtin.cpu.arch == .wasm32) {
+        initItems(zx.client_allocator);
+    } else {
+        resetItemsForSSR();
+    }
+
+    return (
+        <div @{allocator} class="simple-app">
+
+
+            <div class="controls">
+                <div class="jumbotron">
+                    <h3>{"ZX Client-Side keyed"}</h3>
+                    <h2>Item Count: {&count}</h2>
+                    <div class="button-grid">
+                        <form method="create_row" onsubmit={create_rows}>
+                            <button type="submit" class="add-btn">Create 30 rows</button>
+                        </form>
+                        // <form method="add"><button type="submit" class="btn" name="action" value="runlots">Create 10,000 rows</button></form>
+                        <form method="append_rows" onsubmit={append_rows}>
+                            <button type="submit" class="add-btn">Append 10 rows</button>
+                        </form>
+                        // <form method="get"><button type="submit" class="btn" name="action" value="update">Update every 10th row</button></form>
+                        // <form method="get"><button type="submit" class="btn" name="action" value="clear">Clear</button></form>
+                        // <form method="get"><button type="submit" class="btn" name="action" value="swaprows">Swap Rows</button></form>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <ul class="item-list">
+                {for (items.items) |item| (
+                    <li class="list-item" key={item.id}>
+                        <span>{item.text}</span>
+                    </li>
+                )}
+            </ul>
+        </div>
+    );
+}
+
+var next_id: u32 = 1;
+var initialized: bool = false;
+var items = std.ArrayList(Item).empty;
+var items_allocator: std.mem.Allocator = undefined;
+
+fn initItems(allocator: zx.Allocator) void {
+    if (initialized) return;
+    initialized = true;
+    items_allocator = allocator;
+    items = std.ArrayList(Item).empty;
+}
+
+fn resetItemsForSSR() void {
+    items = std.ArrayList(Item).empty;
+    next_id = 1;
+}
+
+fn addRows(count_to_add: u32, clear_first: bool) void {
+    if (clear_first) {
+        items.clearRetainingCapacity();
+        next_id = 1;
+    }
+    
+    for (0..count_to_add) |_| {
+        const text = std.fmt.allocPrint(items_allocator, "Item {d}", .{next_id}) catch @panic("OOM");
+        const item = Item{
+            .id = next_id,
+            .text = text,
+        };
+        
+        items.append(items_allocator, item) catch @panic("OOM");
+        next_id += 1;
+    }
+    
+    zx.requestRender();
+    count.set(@intCast(items.items.len));
+}
+
+fn create_rows(ctx: zx.EventContext) void {
+    ctx.preventDefault();
+    if (comptime builtin.cpu.arch != .wasm32) return;
+    addRows(30, true);
+}
+
+fn append_rows(ctx: zx.EventContext) void {
+    ctx.preventDefault();
+    if (comptime builtin.cpu.arch != .wasm32) return;
+    addRows(10, false);
+}
+
+fn addItem(ctx: zx.EventContext) void {
+    ctx.preventDefault();
+    if (comptime builtin.cpu.arch != .wasm32) return;
+
+    const document = zx.client.Document.init(zx.client_allocator);
+    const input = document.getElementById("text-input") catch return;
+    const text = input.ref.getAlloc(js.String, zx.client_allocator, "value") catch return;
+    
+    if (text.len == 0) return;
+    
+    const item = Item{
+        .id = next_id,
+        .text = text,
+    };
+    
+    items.append(items_allocator, item) catch @panic("OOM");
+    next_id += 1;
+    
+    input.ref.set("value", js.string("")) catch return;
+    zx.requestRender();
+    count.set(count.get()+1);
+}
+
+const zx = @import("zx");
+const std = @import("std");
+const builtin = @import("builtin");
+const client = zx.client;
+const js = zx.Client.js;
