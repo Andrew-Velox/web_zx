@@ -1,6 +1,5 @@
 pub const CounterComponent = @import("./client.zig").CounterComponent;
 
-// pub const DataComponent = @import("./data.zig").DataComponent;
 
 pub fn Page(ctx: zx.PageContext) zx.Component {
     return (
@@ -10,7 +9,7 @@ pub fn Page(ctx: zx.PageContext) zx.Component {
         </main>
     );
 }
-var count: zx.Signal(i32) = .init(0);
+// var count: zx.Signal(i32) = .init(0);
 
 
 const Item = struct { id: u32, text: []const u8 };
@@ -29,18 +28,26 @@ pub fn SimpleApp(allocator: zx.Allocator) zx.Component {
             <div class="controls">
                 <div class="jumbotron">
                     <h3>{"ZX Client-Side keyed"}</h3>
-                    <h2>Row Count: {&count}</h2>
+                    // <h2>Row Count: {&count}</h2>
                     <div class="button-grid">
                         <form method="create_row" onsubmit={create_rows}>
-                            <button type="submit" class="add-btn">Create 30 rows</button>
+                            <button type="submit" class="add-btn">Create 1,000 rows</button>
                         </form>
-                        // <form method="add"><button type="submit" class="btn" name="action" value="runlots">Create 10,000 rows</button></form>
+                        <form method="create_large_row" onsubmit={create_large_rows}>
+                            <button type="submit" class="add-btn">Create 10,000 rows</button>
+                        </form>
                         <form method="append_rows" onsubmit={append_rows}>
-                            <button type="submit" class="add-btn">Append 10 rows</button>
+                            <button type="submit" class="add-btn">Append 1,000 rows</button>
                         </form>
-                        // <form method="get"><button type="submit" class="btn" name="action" value="update">Update every 10th row</button></form>
-                        // <form method="get"><button type="submit" class="btn" name="action" value="clear">Clear</button></form>
-                        // <form method="get"><button type="submit" class="btn" name="action" value="swaprows">Swap Rows</button></form>
+                        <form method="update_rows" onsubmit={updateRows}>
+                            <button type="submit" class="add-btn" name="action" value="update">Update every 10th row</button>
+                        </form>
+                        <form method="clear_rows" onsubmit={clearRows}>
+                            <button type="submit" class="add-btn">Clear</button>
+                        </form>
+                        <form method="swap_rows" onsubmit={swapRows}>
+                            <button type="submit" class="btn" name="action" value="swaprows">Swap Rows</button>
+                        </form>
                     </div>
                 </div>
 
@@ -49,7 +56,7 @@ pub fn SimpleApp(allocator: zx.Allocator) zx.Component {
 
             <ul class="item-list">
                 {for (items.items) |item| (
-                    <li class="list-item" key={item.id}>
+                    <li class="list-item">
                         <span>{item.text}</span>
                     </li>
                 )}
@@ -73,6 +80,37 @@ fn initItems(allocator: zx.Allocator) void {
 fn resetItemsForSSR() void {
     items = std.ArrayList(Item).empty;
     next_id = 1;
+}
+
+fn clearRows(ctx: zx.EventContext) void {
+    ctx.preventDefault();
+    if (comptime builtin.cpu.arch != .wasm32) return;
+    items.clearRetainingCapacity();
+    next_id = 1;
+    zx.requestRender();
+}
+
+fn swapRows(ctx: zx.EventContext) void {
+    ctx.preventDefault();
+    if (comptime builtin.cpu.arch != .wasm32) return;
+    if (items.items.len > 998) {
+        const tmp = items.items[1];
+        items.items[1] = items.items[998];
+        items.items[998] = tmp;
+        zx.requestRender();
+    }
+}
+
+fn updateRows(ctx: zx.EventContext) void {
+    ctx.preventDefault();
+    if (comptime builtin.cpu.arch != .wasm32) return;
+    var i: usize = 0;
+    while (i < items.items.len) : (i += 10) {
+        const item = &items.items[i];
+        const new_text = std.fmt.allocPrint(items_allocator, "{s} !!!", .{item.text}) catch @panic("OOM");
+        item.text = new_text;
+    }
+    zx.requestRender();
 }
 
 var prng = std.Random.DefaultPrng.init(123456789);
@@ -142,7 +180,7 @@ fn BuildRows(count_to_add: u32, clear_first: bool) void {
     };
     
     for (0..count_to_add) |_| {
-        const text = std.fmt.allocPrint(items_allocator, "{s} {s} {s}", .{adjectives[RandomNumber(adjectives.len)], colours[RandomNumber(colours.len)], nouns[RandomNumber(nouns.len)]}) catch @panic("OOM");
+        const text = std.fmt.allocPrint(items_allocator,  "{}. {s} {s} {s}", .{next_id, adjectives[RandomNumber(adjectives.len)], colours[RandomNumber(colours.len)], nouns[RandomNumber(nouns.len)]}) catch @panic("OOM");
         const item = Item{
             .id = next_id,
             .text = text,
@@ -153,19 +191,24 @@ fn BuildRows(count_to_add: u32, clear_first: bool) void {
     }
     
     zx.requestRender();
-    count.set(@intCast(items.items.len));
+    // count.set(@intCast(items.items.len));
 }
 
 fn create_rows(ctx: zx.EventContext) void {
     ctx.preventDefault();
     if (comptime builtin.cpu.arch != .wasm32) return;
-    BuildRows(RandomNumber(30), true);
+    BuildRows(1000, true);
+}
+fn create_large_rows(ctx: zx.EventContext) void {
+    ctx.preventDefault();
+    if (comptime builtin.cpu.arch != .wasm32) return;
+    BuildRows(10000, true);
 }
 
 fn append_rows(ctx: zx.EventContext) void {
     ctx.preventDefault();
     if (comptime builtin.cpu.arch != .wasm32) return;
-    // addRows(10, false);
+    BuildRows(1000, false);
 }
 
 const zx = @import("zx");
