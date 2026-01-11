@@ -1,13 +1,17 @@
 pub const CounterComponent = @import("./client.zig").CounterComponent;
+
+// pub const DataComponent = @import("./data.zig").DataComponent;
+
 pub fn Page(ctx: zx.PageContext) zx.Component {
     return (
         <main @allocator={ctx.arena}>
             <SimpleApp @rendering={.client} @allocator={ctx.arena} />
-            
+            // <CounterComponent @rendering={.client} @allocator={ctx.arena} />
         </main>
     );
 }
 var count: zx.Signal(i32) = .init(0);
+
 
 const Item = struct { id: u32, text: []const u8 };
 
@@ -21,11 +25,11 @@ pub fn SimpleApp(allocator: zx.Allocator) zx.Component {
     return (
         <div @{allocator} class="simple-app">
 
-
+            
             <div class="controls">
                 <div class="jumbotron">
                     <h3>{"ZX Client-Side keyed"}</h3>
-                    <h2>Item Count: {&count}</h2>
+                    <h2>Row Count: {&count}</h2>
                     <div class="button-grid">
                         <form method="create_row" onsubmit={create_rows}>
                             <button type="submit" class="add-btn">Create 30 rows</button>
@@ -71,6 +75,11 @@ fn resetItemsForSSR() void {
     next_id = 1;
 }
 
+var prng = std.Random.DefaultPrng.init(123456789);
+fn RandomNumber(max: u32) u32 {
+    return @intCast(prng.random().uintLessThan(u64, max));
+}
+
 fn addRows(count_to_add: u32, clear_first: bool) void {
     if (clear_first) {
         items.clearRetainingCapacity();
@@ -78,7 +87,7 @@ fn addRows(count_to_add: u32, clear_first: bool) void {
     }
     
     for (0..count_to_add) |_| {
-        const text = std.fmt.allocPrint(items_allocator, "Item {d}", .{next_id}) catch @panic("OOM");
+        const text = std.fmt.allocPrint(items_allocator, "Row {d}", .{next_id}) catch @panic("OOM");
         const item = Item{
             .id = next_id,
             .text = text,
@@ -95,7 +104,7 @@ fn addRows(count_to_add: u32, clear_first: bool) void {
 fn create_rows(ctx: zx.EventContext) void {
     ctx.preventDefault();
     if (comptime builtin.cpu.arch != .wasm32) return;
-    addRows(30, true);
+    addRows(RandomNumber(30), true);
 }
 
 fn append_rows(ctx: zx.EventContext) void {
