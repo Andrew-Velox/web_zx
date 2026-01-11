@@ -80,14 +80,69 @@ fn RandomNumber(max: u32) u32 {
     return @intCast(prng.random().uintLessThan(u64, max));
 }
 
-fn addRows(count_to_add: u32, clear_first: bool) void {
+fn BuildRows(count_to_add: u32, clear_first: bool) void {
     if (clear_first) {
         items.clearRetainingCapacity();
         next_id = 1;
     }
+    const adjectives = [_][]const u8{
+        "pretty",
+        "large",
+        "big",
+        "small",
+        "tall",
+        "short",
+        "long",
+        "handsome",
+        "plain",
+        "quaint",
+        "clean",
+        "elegant",
+        "easy",
+        "angry",
+        "crazy",
+        "helpful",
+        "mushy",
+        "odd",
+        "unsightly",
+        "adorable",
+        "important",
+        "inexpensive",
+        "cheap",
+        "expensive",
+        "fancy",
+    };
+    const colours = [_][]const u8{
+        "red",
+        "yellow",
+        "blue",
+        "green",
+        "pink",
+        "brown",
+        "purple",
+        "brown",
+        "white",
+        "black",
+        "orange"
+    };
+    const nouns = [_][]const u8{
+        "table",
+        "chair",
+        "house",
+        "bbq",
+        "desk",
+        "car",
+        "pony",
+        "cookie",
+        "sandwich",
+        "burger",
+        "pizza",
+        "mouse",
+        "keyboard"
+    };
     
     for (0..count_to_add) |_| {
-        const text = std.fmt.allocPrint(items_allocator, "Row {d}", .{next_id}) catch @panic("OOM");
+        const text = std.fmt.allocPrint(items_allocator, "{s} {s} {s}", .{adjectives[RandomNumber(adjectives.len)], colours[RandomNumber(colours.len)], nouns[RandomNumber(nouns.len)]}) catch @panic("OOM");
         const item = Item{
             .id = next_id,
             .text = text,
@@ -104,36 +159,13 @@ fn addRows(count_to_add: u32, clear_first: bool) void {
 fn create_rows(ctx: zx.EventContext) void {
     ctx.preventDefault();
     if (comptime builtin.cpu.arch != .wasm32) return;
-    addRows(RandomNumber(30), true);
+    BuildRows(RandomNumber(30), true);
 }
 
 fn append_rows(ctx: zx.EventContext) void {
     ctx.preventDefault();
     if (comptime builtin.cpu.arch != .wasm32) return;
-    addRows(10, false);
-}
-
-fn addItem(ctx: zx.EventContext) void {
-    ctx.preventDefault();
-    if (comptime builtin.cpu.arch != .wasm32) return;
-
-    const document = zx.client.Document.init(zx.client_allocator);
-    const input = document.getElementById("text-input") catch return;
-    const text = input.ref.getAlloc(js.String, zx.client_allocator, "value") catch return;
-    
-    if (text.len == 0) return;
-    
-    const item = Item{
-        .id = next_id,
-        .text = text,
-    };
-    
-    items.append(items_allocator, item) catch @panic("OOM");
-    next_id += 1;
-    
-    input.ref.set("value", js.string("")) catch return;
-    zx.requestRender();
-    count.set(count.get()+1);
+    // addRows(10, false);
 }
 
 const zx = @import("zx");
