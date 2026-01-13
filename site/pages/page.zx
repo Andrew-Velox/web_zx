@@ -1,16 +1,11 @@
-pub const CounterComponent = @import("./client.zig").CounterComponent;
-
 
 pub fn Page(ctx: zx.PageContext) zx.Component {
     return (
         <main @allocator={ctx.arena}>
             <SimpleApp @rendering={.client} @allocator={ctx.arena} />
-            // <CounterComponent @rendering={.client} @allocator={ctx.arena} />
         </main>
     );
 }
-// var count: zx.Signal(i32) = .init(0);
-
 
 const Item = struct { id: u32, text: []const u8 };
 
@@ -23,36 +18,23 @@ pub fn SimpleApp(allocator: zx.Allocator) zx.Component {
 
     return (
         <div @{allocator} class="simple-app">
-
-            
-            <div class="controls">
-                <div class="jumbotron">
-                    <h3>{"ZX Client-Side keyed"}</h3>
-                    // <h2>Row Count: {&count}</h2>
-                    <div class="button-grid">
-                        <form method="create_row" onsubmit={create_rows}>
-                            <button type="submit" class="add-btn">Create 1,000 rows</button>
-                        </form>
-                        <form method="create_large_row" onsubmit={create_large_rows}>
-                            <button type="submit" class="add-btn">Create 10,000 rows</button>
-                        </form>
-                        <form method="append_rows" onsubmit={append_rows}>
-                            <button type="submit" class="add-btn">Append 1,000 rows</button>
-                        </form>
-                        <form method="update_rows" onsubmit={updateRows}>
-                            <button type="submit" class="add-btn" name="action" value="update">Update every 10th row</button>
-                        </form>
-                        <form method="clear_rows" onsubmit={clearRows}>
-                            <button type="submit" class="add-btn">Clear</button>
-                        </form>
-                        <form method="swap_rows" onsubmit={swapRows}>
-                            <button type="submit" class="btn" name="action" value="swaprows">Swap Rows</button>
-                        </form>
+            <div class="jumbotron">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1>{"ZX Client-Side keyed"}</h1>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <Button onclick={create_rows} id="run" title="Create 1,000 rows" />
+                            <Button onclick={create_large_rows} id="runlots" title="Create 10,000 rows" />
+                            <Button onclick={append_rows} id="add" title="Append 1,000 rows" />
+                            <Button onclick={updateRows} id="update" title="Update every 10th row" />
+                            <Button onclick={clearRows} id="clear" title="Clear" />
+                            <Button onclick={swapRows} id="swaprows" title="Swap Rows" />
+                        </div>
                     </div>
                 </div>
-
             </div>
-
 
             <ul class="item-list">
                 {for (items.items) |item| (
@@ -65,6 +47,18 @@ pub fn SimpleApp(allocator: zx.Allocator) zx.Component {
     );
 }
 
+
+const ButtonProps = struct { onclick: *const fn (zx.EventContext) void, title: []const u8, id: []const u8 };
+
+fn Button(ctx: *zx.ComponentCtx(ButtonProps)) zx.Component {
+    return (
+        <div @allocator={ctx.allocator} class="col-sm-6 smallpad">
+            <button type="button" class="btn btn-primary btn-block" onclick={ctx.props.onclick} id={ctx.props.id}>
+                {ctx.props.title}
+            </button>
+        </div>
+    );
+}
 var next_id: u32 = 1;
 var initialized: bool = false;
 var items = std.ArrayList(Item).empty;
@@ -82,17 +76,13 @@ fn resetItemsForSSR() void {
     next_id = 1;
 }
 
-fn clearRows(ctx: zx.EventContext) void {
-    ctx.preventDefault();
-    if (comptime builtin.cpu.arch != .wasm32) return;
+fn clearRows(_: zx.EventContext) void {
     items.clearRetainingCapacity();
     next_id = 1;
     zx.requestRender();
 }
 
-fn swapRows(ctx: zx.EventContext) void {
-    ctx.preventDefault();
-    if (comptime builtin.cpu.arch != .wasm32) return;
+fn swapRows(_: zx.EventContext) void {
     if (items.items.len > 998) {
         const tmp = items.items[1];
         items.items[1] = items.items[998];
@@ -101,9 +91,7 @@ fn swapRows(ctx: zx.EventContext) void {
     }
 }
 
-fn updateRows(ctx: zx.EventContext) void {
-    ctx.preventDefault();
-    if (comptime builtin.cpu.arch != .wasm32) return;
+fn updateRows(_: zx.EventContext) void {
     var i: usize = 0;
     while (i < items.items.len) : (i += 10) {
         const item = &items.items[i];
@@ -150,64 +138,32 @@ fn BuildRows(count_to_add: u32, clear_first: bool) void {
         "expensive",
         "fancy",
     };
-    const colours = [_][]const u8{
-        "red",
-        "yellow",
-        "blue",
-        "green",
-        "pink",
-        "brown",
-        "purple",
-        "brown",
-        "white",
-        "black",
-        "orange"
-    };
-    const nouns = [_][]const u8{
-        "table",
-        "chair",
-        "house",
-        "bbq",
-        "desk",
-        "car",
-        "pony",
-        "cookie",
-        "sandwich",
-        "burger",
-        "pizza",
-        "mouse",
-        "keyboard"
-    };
-    
+    const colours = [_][]const u8{ "red", "yellow", "blue", "green", "pink", "brown", "purple", "brown", "white", "black", "orange" };
+    const nouns = [_][]const u8{ "table", "chair", "house", "bbq", "desk", "car", "pony", "cookie", "sandwich", "burger", "pizza", "mouse", "keyboard" };
+
     for (0..count_to_add) |_| {
-        const text = std.fmt.allocPrint(items_allocator,  "{}. {s} {s} {s}", .{next_id, adjectives[RandomNumber(adjectives.len)], colours[RandomNumber(colours.len)], nouns[RandomNumber(nouns.len)]}) catch @panic("OOM");
+        const text = std.fmt.allocPrint(items_allocator, "{s} {s} {s}", .{ adjectives[RandomNumber(adjectives.len)], colours[RandomNumber(colours.len)], nouns[RandomNumber(nouns.len)] }) catch @panic("OOM");
         const item = Item{
             .id = next_id,
             .text = text,
         };
-        
+
         items.append(items_allocator, item) catch @panic("OOM");
         next_id += 1;
     }
-    
+
     zx.requestRender();
     // count.set(@intCast(items.items.len));
 }
 
-fn create_rows(ctx: zx.EventContext) void {
-    ctx.preventDefault();
-    if (comptime builtin.cpu.arch != .wasm32) return;
+fn create_rows(_: zx.EventContext) void {
     BuildRows(1000, true);
 }
-fn create_large_rows(ctx: zx.EventContext) void {
-    ctx.preventDefault();
-    if (comptime builtin.cpu.arch != .wasm32) return;
+fn create_large_rows(_: zx.EventContext) void {
     BuildRows(10000, true);
 }
 
-fn append_rows(ctx: zx.EventContext) void {
-    ctx.preventDefault();
-    if (comptime builtin.cpu.arch != .wasm32) return;
+fn append_rows(_: zx.EventContext) void {
     BuildRows(1000, false);
 }
 
