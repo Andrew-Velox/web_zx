@@ -37,21 +37,11 @@ pub fn SimpleApp(allocator: zx.Allocator) zx.Component {
             <table class="table table-hover table-striped test-data">
                 <tbody>
                     {for (items.items) |item| (
-                        // <tr key={item.id}>
-                            // <td class="col-md-1">{item.id}</td>
-                            // <td class="col-md-4">
-                                <a>{item.text}<br/></a>
-                            // </td>
-                            // <td class="col-md-1">
-                                // <a>
-                                    // <span class="glyphicon glyphicon-remove" aria-hidden="true" />
-                                // </a>
-                            // </td>
-                            // <td class="col-md-6" />
-                        // </tr>
+                        <Row @allocator={allocator} item={item} selected={false} />
                     )}
                 </tbody>
             </table>
+            <span className="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
         </div>
     );
 }
@@ -73,6 +63,33 @@ fn Button(ctx: *zx.ComponentCtx(ButtonProps)) zx.Component {
         </div>
     );
 }
+
+
+
+const RowProps = struct { item: Item, selected: bool };
+
+fn Row(ctx: *zx.ComponentCtx(RowProps)) zx.Component {
+    const item = ctx.props.item;
+    const selected = ctx.props.selected;
+    
+    return (
+        // <tr @allocator={ctx.allocator} class={if (selected) "danger" else ""}>
+        //     <td class="col-md-1">{item.id}</td>
+        //     <td class="col-md-4">
+                <a @allocator={ctx.allocator} class={if (selected) "danger" else ""}>{item.text}</a>
+            // </td>
+            // <td class="col-md-1">
+            //     <a>
+            //         <span class="glyphicon glyphicon-remove" aria-hidden="true" />
+            //     </a>
+            // </td>
+            // <td class="col-md-6" />
+        // </tr>
+    );
+}
+
+
+
 var next_id: u32 = 1;
 var initialized: bool = false;
 var items = std.ArrayList(Item).empty;
