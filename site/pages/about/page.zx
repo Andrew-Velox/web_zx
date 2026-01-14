@@ -11,12 +11,13 @@ pub fn Page(ctx: zx.PageContext) zx.Component {
             <div class="about-content">
                 <div class="feature-card">
                     <h2>Our Mission</h2>
-                    <p>To provide developers and competitive programmers with a seamless way to access Codeforces problem sets, user statistics, and contest data using the power of Zig and ZX.</p>
+                    <p>lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </p>
                 </div>
 
                 <div class="feature-card">
                     <h2>Why Zig?</h2>
-                    <p>Built with performance in mind, our fetcher utilizes Zig's memory safety and speed to ensure you get your data instantly without overhead.</p>
+                    <p>lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
                 </div>
             </div>
         </div>

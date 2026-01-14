@@ -9,7 +9,7 @@ pub fn Layout(ctx: zx.LayoutContext, children: zx.Component) zx.Component {
 
             <body>
                 {children}
-                <NavBar .NavBar @allocator={ctx.arena} />
+                <NavBar .NavBar @allocator={ctx.arena} title="ZX-WEB" />
                 <script src=`https://cdn.jsdelivr.net/npm/ziex@{zx.info.version_string}/wasm/init.min.js` />
             </body>
         </html>
