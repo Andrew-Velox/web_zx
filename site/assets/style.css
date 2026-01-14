@@ -1,0 +1,260 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    padding-top: 64px; /* Exact navbar height */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', sans-serif;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+main {
+    height: 100%;
+}
+
+/* Modern Navbar Styles */
+.navbar {
+    background: #178fff;
+    /* box-shadow: 0 2px 8px rgba(15, 79, 255, 0.979); */
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.navbar-fixed-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.navbar .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px;
+}
+
+.navbar-header {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand {
+    color: white !important;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: -0.3px;
+    transition: opacity 0.2s ease;
+}
+
+.navbar-brand:hover {
+    opacity: 0.85;
+}
+
+.navbar-nav {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 0.25rem;
+}
+
+.navbar-nav li {
+    display: inline-block;
+}
+
+.navbar-nav a {
+    color: rgba(255, 255, 255, 0.95);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    /* border-radius: 6px; */
+    font-weight: 500;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.navbar-nav a:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+}
+
+.navbar-nav a:active {
+    transform: scale(0.98);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar .container {
+        flex-direction: column;
+        height: auto;
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+    
+    .navbar-nav {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+    
+    body {
+        padding-top: 100px;
+    }
+}/* About Page Styles */
+.about-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.about-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+}
+
+.about-header h1 {
+    font-size: 2.5rem;
+    color: #178fff;
+    margin-bottom: 1rem;
+}
+
+.about-header .subtitle {
+    font-size: 1.25rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-card h2 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.feature-card p {
+    color: #555;
+    line-height: 1.6;
+}
+
+
+.simple-app {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+/* Sidebar */
+.controls {
+    width: 350px;
+    padding: 20px;
+    background: #2d2d2d;
+    border-right: 1px solid #3a3a3a;
+    overflow-y: auto;
+}
+
+.jumbotron {
+    background: #3a3a3a;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    margin-bottom: 20px;
+}
+
+.jumbotron h3 {
+    margin: 0 0 15px 0;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 400;
+}
+
+.jumbotron h2 {
+    margin: 0 0 20px 0;
+    color: #5b9dd9;
+    font-size: 18px;
+}
+
+.button-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+button {
+    width: 100%;
+    padding: 12px 20px;
+    background: #2b5a8d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #3a6ba5;
+}
+
+/* Item List */
+.item-list {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    list-style: none;
+    margin: 0;
+}
+
+.list-item {
+    padding: 12px 16px;
+    background: #2d2d2d;
+    border-bottom: 1px solid #3a3a3a;
+    color: #e0e0e0;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.list-item:hover {
+    background: #353535;
+}
+
+.list-item.selected {
+    background: #3a6ba5;
+    color: white;
+}
+

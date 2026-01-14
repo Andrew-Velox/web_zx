@@ -1,0 +1,26 @@
+pub fn NavBar(allocator: zx.Allocator) zx.Component {
+    return (
+        <nav @allocator={allocator} class="navbar navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/">ZX Benchmark</a>
+                </div>
+                <ul class="navbar-nav">
+                    <li>
+                        <a href="/about">About</a>
+                    </li>
+                    <li>
+                        <a href="/keyed">Keyed</a>
+                    </li>
+                    <li>
+                        <a href="/immutable">Immutable</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    );
+}
+
+
+const zx = @import("zx");
+const std = @import("std");

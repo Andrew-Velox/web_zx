@@ -16,32 +16,25 @@ pub fn SimpleApp(allocator: zx.Allocator) zx.Component {
 
 
     return (
-        <div @{allocator} class="container">
-            <div class="jumbotron">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h1>{"ZX Client-Side keyed"}</h1>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="row">
-                            <Button onclick={create_rows} id="run" title="Create 1,000 rows" />
-                            <Button onclick={create_large_rows} id="runlots" title="Create 10,000 rows" />
-                            <Button onclick={append_rows} id="add" title="Append 1,000 rows" />
-                            <Button onclick={updateRows} id="update" title="Update every 10th row" />
-                            <Button onclick={clearRows} id="clear" title="Clear" />
-                            <Button onclick={swapRows} id="swaprows" title="Swap Rows" />
-                        </div>
-                    </div>
+        <div @{allocator} class="simple-app">
+            <div class="controls">
+                <div class="jumbotron">
+                    <h3>ZX Client-Side keyed</h3>
+                </div>
+                <div class="button-grid">
+                    <Button onclick={create_rows} id="run" title="Create 1,000 rows" />
+                    <Button onclick={create_large_rows} id="runlots" title="Create 10,000 rows" />
+                    <Button onclick={append_rows} id="add" title="Append 1,000 rows" />
+                    <Button onclick={updateRows} id="update" title="Update every 10th row" />
+                    <Button onclick={clearRows} id="clear" title="Clear" />
+                    <Button onclick={swapRows} id="swaprows" title="Swap Rows" />
                 </div>
             </div>
-            <table class="table table-hover table-striped test-data">
-                <tbody>
-                    {for (items.items) |item| (
-                        <Row @allocator={allocator} item={item} selected={false} />
-                    )}
-                </tbody>
-            </table>
-            <span className="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
+            <ul class="item-list">
+                {for (items.items) |item| (
+                    <Row @allocator={allocator} item={item} selected={item.id == selected_id} />
+                )}
+            </ul>
         </div>
     );
 }
@@ -56,11 +49,9 @@ const ButtonProps = struct { onclick: *const fn (zx.EventContext) void, title: [
 
 fn Button(ctx: *zx.ComponentCtx(ButtonProps)) zx.Component {
     return (
-        <div @allocator={ctx.allocator} class="col-sm-6 smallpad">
-            <button type="button" class="btn btn-primary btn-block" onclick={ctx.props.onclick} id={ctx.props.id}>
-                {ctx.props.title}
-            </button>
-        </div>
+        <button @allocator={ctx.allocator} type="button" onclick={ctx.props.onclick} id={ctx.props.id}>
+            {ctx.props.title}
+        </button>
     );
 }
 
@@ -73,18 +64,9 @@ fn Row(ctx: *zx.ComponentCtx(RowProps)) zx.Component {
     const selected = ctx.props.selected;
     
     return (
-        // <tr @allocator={ctx.allocator} class={if (selected) "danger" else ""}>
-        //     <td class="col-md-1">{item.id}</td>
-        //     <td class="col-md-4">
-                <a @allocator={ctx.allocator} class={if (selected) "danger" else ""}>{item.text}</a>
-            // </td>
-            // <td class="col-md-1">
-            //     <a>
-            //         <span class="glyphicon glyphicon-remove" aria-hidden="true" />
-            //     </a>
-            // </td>
-            // <td class="col-md-6" />
-        // </tr>
+        <li @allocator={ctx.allocator} class={if (selected) "list-item selected" else "list-item"}>
+            {item.text}
+        </li>
     );
 }
 
