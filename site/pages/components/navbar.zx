@@ -15,7 +15,7 @@ pub fn NavBar(ctx: *zx.ComponentCtx(NavBarProps)) zx.Component {
                         <a href="/about">About</a>
                     </li>
                     <li>
-                        <a href="/keyed">Keyed</a>
+                        <a href="/keyed">Test</a>
                     </li>
                     <li>
                         <a href="/immutable">Immutable</a>
